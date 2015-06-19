@@ -29,6 +29,7 @@ class Client:
     while data != 'quit':
       data = raw_input("CMD :")
       self.client.send(data)
+      print(self.client.recv(1024))
 
     self.client.close()
 

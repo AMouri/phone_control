@@ -5,6 +5,7 @@ Server to send bash commands to standard input. Sends output back to client
 """
 import select
 import socket
+import subprocess
 import sys
 import threading
 
@@ -53,6 +54,23 @@ class Client(threading.Thread):
       if data:
         #for now, echo
         print(data)
+        process = subprocess.Popen(
+            data.decode('utf-8'), 
+            shell=True,
+            stdout=subprocess.PIPE,
+            stdin=subprocess.PIPE,
+            stderr=subprocess.STDOUT
+        )
+        stdoutdata, stderrdata = process.communicate()
+        try:
+          if(stdoutdata == ""):
+            self.client.send(bytes("Request completed!"))
+          else: 
+            self.client.send(bytes(stdoutdata))
+        except socket.error, (value, message):
+          print "Failed to send output: " + stdoutdata
+          print "Error: " + message
+
       else:
         self.client.close()
         running = False
